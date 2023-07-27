@@ -1,15 +1,11 @@
-name: Update Helm Chart
+name: Update SonarQube Helm Chart
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/*.yaml"
-      - "charts/sonarqube-dce/Chart.yaml"
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
 
 jobs:
-  build:
+  update:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,12 +15,22 @@ jobs:
     - name: Set up Helm
       uses: azure/setup-helm@v1
 
-    - name: Update Chart Version
+    - name: Clone original SonarQube Helm chart
       run: |
-        version=$(git describe --abbrev=0)
-        sed -i "s/^version:.*/version: $version/" Chart.yaml
+        git clone https://github.com/SonarSource/helm-chart-sonarqube.git sonarqube
+      working-directory: sonarqube
+
+    - name: Copy SonarQube Helm chart files
+      run: |
+        cp -r helm-chart-sonarqube/* .
+        cp -r helm-chart-sonarqube/.github .
+      working-directory: sonarqube
+
+    - name: Commit and Push Helm chart update
+      run: |
         git config --global user.name "Dimitar Ivanov"
         git config --global user.email "d.ivanov@mmstat.org"
-        git add Chart.yaml
-        git commit -m "Update chart version to $version"
+        git add .
+        git commit -m "Update SonarQube Helm chart to latest version"
         git push
+      working-directory: sonarqube
