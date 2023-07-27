@@ -1,5 +1,0 @@
-searchNodes:
-  persistence:
-    enabled: true
-    annotations:
-      someAnnotations: toto      

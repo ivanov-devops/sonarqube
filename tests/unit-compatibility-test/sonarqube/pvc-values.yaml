@@ -1,7 +1,0 @@
-persistence:
-  enabled: true
-  annotations:
-      someAnnotations: toto
-postgresql:
-  persistence:
-    enabled: true
