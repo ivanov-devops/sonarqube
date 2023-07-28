@@ -28,32 +28,35 @@ jobs:
         run: |
           helm lint charts/sonarqube-dce/
 
+      - name: Get the latest commit hash
+        id: commit_hash
+        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+
       - name: Get new chart version
         run: |
           echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
           awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
           >> $GITHUB_ENV
+        shell: bash
 
       - name: Update chart version
         run: |
           sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
-
-      - name: Debug
-        id: version
-        run: |
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        shell: bash
 
       - name: Copy chart to gh-pages branch
         run: |
           git fetch origin gh-pages
           git checkout gh-pages -f
           git checkout main charts/sonarqube-dce/ -f
+        shell: bash
 
       - name: Package and indexing Chart
         run: |
           helm dependency update charts/sonarqube-dce/
           helm package charts/sonarqube-dce/
           helm repo index .
+        shell: bash
 
       - name: Commit to branch
         run: |
@@ -76,8 +79,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: "${{ env.VERSION }}-sonarqube-dce"
-          release_name: "${{ env.VERSION }}-sonarqube-dce"
+          tag_name: "${{ env.VERSION }}-${{ steps.commit_hash.outputs.hash }}-sonarqube-dce"
+          release_name: "${{ env.VERSION }}-${{ steps.commit_hash.outputs.hash }}-sonarqube-dce"
           body: ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: false
