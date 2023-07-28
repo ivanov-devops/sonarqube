@@ -12,11 +12,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Helm
       uses: azure/setup-helm@v3
       with:
         version: v3.8.1
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Fetch deps
       run: |
@@ -61,8 +64,6 @@ jobs:
         git add index.yaml sonarqube-dce*.tgz
         git commit -m "[AUTO] New sonarqube-dce Chart version"
         git push
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Create Release
       id: create_release
