@@ -43,10 +43,12 @@ jobs:
 #        echo "VERSION=${VERSION}-rc" >> $GITHUB_ENV
 
     - name: Get new chart version
+      id: version
       run: |
-        echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
-        awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
-        >> $GITHUB_ENV
+        VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
+        awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
 
     - name: Debug
       id: version
