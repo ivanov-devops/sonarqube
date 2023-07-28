@@ -28,29 +28,20 @@ jobs:
         run: |
           helm lint charts/sonarqube-dce/
 
-      - name: Get latest tag
-        id: latest_tag
+      - name: Get new chart version
         run: |
-          latest_tag=$(git describe --abbrev=0 --tags)
-          echo "::set-output name=tag::$latest_tag"
-
-      - name: Increment version
-        id: increment_version
-        run: |
-          # Extract major, minor, and patch from the latest tag
-          major=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $1}')
-          minor=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $2}')
-          patch=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $3}')
-
-          # Increment the patch version
-          patch=$((patch + 1))
-
-          # Set the new version as an environment variable
-          echo "VERSION=${major}.${minor}.${patch}" >> $GITHUB_ENV
+          echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
+          awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
+          >> $GITHUB_ENV
 
       - name: Update chart version
         run: |
-          sed -i 's/^version: .*$/version: '"${{ env.VERSION }}/" charts/sonarqube-dce/Chart.yaml
+          sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
+
+      - name: Debug
+        id: version
+        run: |
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Copy chart to gh-pages branch
         run: |
@@ -66,12 +57,14 @@ jobs:
 
       - name: Commit to branch
         run: |
-          git config user.email "d.ivanov@mmstat.org"
-          git config user.name "Dimitar Ivanov"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "${GITHUB_ACTOR}"
           git restore --staged charts/sonarqube-dce/
           git add index.yaml sonarqube-dce*.tgz
           git commit -m "[AUTO] New sonarqube-dce Chart version"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate changelog
         id: changelog
@@ -83,8 +76,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ env.VERSION }}-sonarqube-dce
-          release_name: ${{ env.VERSION }}-sonarqube-dce
+          tag_name: "${{ env.VERSION }}-sonarqube-dce"
+          release_name: "${{ env.VERSION }}-sonarqube-dce"
           body: ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: false
