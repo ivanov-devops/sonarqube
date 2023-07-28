@@ -2,8 +2,9 @@ name: Build SonarQube
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
+    paths: ['charts/**']
+
     tags:
       - '*' # Push events to matching *, i.e. 1.0, 4.1.0
 
