@@ -34,6 +34,12 @@ jobs:
         awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
         >> $GITHUB_ENV
 
+    - name: Generate changelog
+      id: Changelog
+      uses: metcalfc/changelog-generator@v4.0.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Update chart version
       run: |
         sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
@@ -74,6 +80,8 @@ jobs:
         draft: false
         prerelease: false
         commitish: main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Kubernetes
       run: |
