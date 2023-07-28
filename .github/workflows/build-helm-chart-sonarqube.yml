@@ -28,18 +28,29 @@ jobs:
         run: |
           helm lint charts/sonarqube-dce/
 
-      - name: Get new chart version
+      - name: Get latest tag
+        id: latest_tag
         run: |
-          echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
-          awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
-          >> $GITHUB_ENV
+          latest_tag=$(git describe --abbrev=0 --tags)
+          echo "::set-output name=tag::$latest_tag"
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          # Extract major, minor, and patch from the latest tag
+          major=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $1}')
+          minor=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $2}')
+          patch=$(echo ${{ steps.latest_tag.outputs.tag }} | awk -F. '{print $3}')
+
+          # Increment the patch version
+          patch=$((patch + 1))
+
+          # Set the new version as an environment variable
+          echo "VERSION=${major}.${minor}.${patch}" >> $GITHUB_ENV
 
       - name: Update chart version
         run: |
-          sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
-
-      - name: Debug
-        run: echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          sed -i 's/^version: .*$/version: '"${{ env.VERSION }}/" charts/sonarqube-dce/Chart.yaml
 
       - name: Copy chart to gh-pages branch
         run: |
