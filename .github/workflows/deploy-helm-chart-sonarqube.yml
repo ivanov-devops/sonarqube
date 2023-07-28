@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v4.1.0
+      - '*' # Push events to matching *, i.e. 1.0, 4.1.0
 
 jobs:
   deploy:
