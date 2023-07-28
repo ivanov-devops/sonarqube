@@ -35,8 +35,8 @@ jobs:
         >> $GITHUB_ENV
 
     - name: Generate changelog
-      id: Changelog
-      uses: metcalfc/changelog-generator@v4.0.1
+      id: changelog
+      uses: metcalfc/changelog-generator@v4.1.0
       with:
         myToken: ${{ secrets.GITHUB_TOKEN }}
 
