@@ -321,9 +321,9 @@ ingress:
   enabled: true
   # Used to create an Ingress record.
   hosts:
-    - name: sonarqube.your-org.com
+    - name: sonarqube.sap.com
   #     Different clouds or configurations might need /* as the default path
-  #     path: /
+      path: /*
       # For additional control over serviceName and servicePort
       # serviceName: someService
       # servicePort: somePort
