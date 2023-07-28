@@ -20,9 +20,9 @@ jobs:
 
     - name: Install Helm Chart
       run: |
-        helm repo add sonarqube-dce https://ivanov-devops.github.io/sonarqube/
+        helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
         helm repo update
         #kubectl create namespace sonarqube-dce
         kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
         export JWT_SECRET=$(echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64)
-        helm upgrade --install -n sonarqube-dce sonarqube-dce-10.2.0 sonarqube/sonarqube --set ApplicationNodes.jwtSecret=$JWT_SECRET
+        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube --set ApplicationNodes.jwtSecret=$JWT_SECRET
