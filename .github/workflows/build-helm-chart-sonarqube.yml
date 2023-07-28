@@ -1,4 +1,4 @@
-name: Deploy SonarQube
+name: Build SonarQube
 
 on:
   push:
@@ -83,17 +83,3 @@ jobs:
         commitish: main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Set up Kubernetes
-      run: |
-        mkdir ${HOME}/.kube
-        echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-        cat ${HOME}/.kube/config
-
-    - name: Install Helm Chart
-      run: |
-        helm repo add sonarqube https://ivanov-devops.github.io/sonarqube
-        helm repo update
-        kubectl create namespace sonarqube-dce
-        export JWT_SECRET=$(echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64)
-        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
