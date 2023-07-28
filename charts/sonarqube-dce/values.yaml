@@ -321,9 +321,9 @@ ingress:
   enabled: true
   # Used to create an Ingress record.
   hosts:
-    - name: sonarqube.sap.com
+    - name: sonarqube.local
   #     Different clouds or configurations might need /* as the default path
-      path: /*
+      path: /
       # For additional control over serviceName and servicePort
       # serviceName: someService
       # servicePort: somePort
@@ -335,7 +335,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "64m"
 
   # Set the ingressClassName on the ingress record
-  # ingressClassName: nginx
+    ingressClassName: nginx
 
 # Additional labels for Ingress manifest file
   # labels:
