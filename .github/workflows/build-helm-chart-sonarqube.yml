@@ -33,15 +33,25 @@ jobs:
 #        awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
 #        >> $GITHUB_ENV
 
+#    - name: Get new chart version
+#      run: |
+#        # Increment the version number
+#        echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
+#        awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
+#        >> $GITHUB_ENV
+#        # Add a suffix to the version
+#        echo "VERSION=${VERSION}-rc" >> $GITHUB_ENV
+
     - name: Get new chart version
       run: |
-        # Increment the version number
         echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
         awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )" \
         >> $GITHUB_ENV
-        # Add a suffix to the version
-        echo "VERSION=${VERSION}-rc" >> $GITHUB_ENV
 
+    - name: Debug
+      id: version
+      run: |
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
 
     - name: Update chart version
@@ -95,11 +105,11 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       with:
-        tag_name: "${{ env.VERSION }}-sonarqube-dce"
-        release_name: "${{ env.VERSION }}-sonarqube-dce"
+        tag_name: "v${{ env.VERSION }}-rc1"  # Change this to a valid tag name
+        release_name: "Release Candidate ${{ env.VERSION }}"  # Customize the release name if needed
         body: ${{ steps.Changelog.outputs.changelog }}
         draft: false
-        prerelease: false
+        prerelease: true  # Set this to true for release candidates
         commitish: main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
