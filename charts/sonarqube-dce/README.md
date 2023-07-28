@@ -529,3 +529,4 @@ In such environments, configuration may be read, via environment variables, from
      configmaps:
        - external-sonarqube-opts
    ```
+   
