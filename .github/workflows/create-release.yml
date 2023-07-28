@@ -1,7 +1,8 @@
 name: create-release
 on:
   push:
-    # Sequence of patterns matched against refs/tags
+  branches:
+    - main
     tags:
       - '*' # Push events to matching *, i.e. v1.0, v4.1.0
 
