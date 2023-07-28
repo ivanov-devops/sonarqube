@@ -188,7 +188,7 @@ ApplicationNodes:
     # sonarWebContext: /
 
   prometheusExporter:
-    enabled: false
+    enabled: true
     # jmx_prometheus_javaagent version to download from Maven Central
     version: "0.17.2"
     # Alternative full download URL for the jmx_prometheus_javaagent.jar (overrides prometheusExporter.version)
@@ -304,7 +304,7 @@ sonarWebContext: ""
 
 # also install the nginx ingress helm chart
 nginx:
-  enabled: false
+  enabled: true
 
 service:
   type: ClusterIP
@@ -318,7 +318,7 @@ service:
   #   - 0.0.0.0/0
   # loadBalancerIP: 1.2.3.4
 ingress:
-  enabled: false
+  enabled: true
   # Used to create an Ingress record.
   hosts:
     - name: sonarqube.your-org.com
