@@ -79,28 +79,28 @@ jobs:
           next_version="$major.$minor.$patch"
           echo "::set-output name=next_version::$next_version"
 
-      - name: Create new tag
-        if: ${{ steps.calculate_version.outputs.next_version != '' }}
-        run: |
-          next_version="${{ steps.calculate_version.outputs.next_version }}"
-          git tag "$next_version"
-          git push origin "$next_version"
+    - name: Create new tag
+      if: ${{ steps.calculate_version.outputs.next_version != '' }}
+      run: |
+        next_version="${{ steps.calculate_version.outputs.next_version }}"
+        git tag "$next_version"
+        git push origin "$next_version"
 
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.1.0
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate changelog
+      id: changelog
+      uses: metcalfc/changelog-generator@v4.1.0
+      with:
+        myToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: "${{ env.VERSION }}-sonarqube-dce"
-          release_name: "${{ env.VERSION }}-sonarqube-dce"
-          body: ${{ steps.Changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
-          commitish: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: "${{ steps.calculate_version.outputs.next_version }}-sonarqube-dce"
+        release_name: "${{ steps.calculate_version.outputs.next_version }}-sonarqube-dce"
+        body: ${{ steps.Changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
+        commitish: main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
