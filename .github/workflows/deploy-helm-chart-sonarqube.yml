@@ -61,6 +61,8 @@ jobs:
         git add index.yaml sonarqube-dce*.tgz
         git commit -m "[AUTO] New sonarqube-dce Chart version"
         git push
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Create Release
       id: create_release
