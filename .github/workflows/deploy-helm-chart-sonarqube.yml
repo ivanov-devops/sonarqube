@@ -24,4 +24,4 @@ jobs:
         helm repo update
         kubectl create namespace sonarqube-dce
         export JWT_SECRET=$(echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64)
-        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
+        helm upgrade --install -n sonarqube-dce sonarqube-dce sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
