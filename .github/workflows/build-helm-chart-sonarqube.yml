@@ -38,7 +38,7 @@ jobs:
 
     - name: Update chart version
       run: |
-        sed -i 's/^version: .*$/version: '"${{ steps.calculate_version.outputs.next_version }}"/1' charts/sonarqube-dce/Chart.yaml
+        sed -i "s/^version: .*/version: '${{ steps.calculate_version.outputs.next_version }}'/1" charts/sonarqube-dce/Chart.yaml
 
     - name: Debug
       id: version
@@ -59,12 +59,14 @@ jobs:
 
     - name: Commit to branch
       run: |
-        git config user.email "d.ivanov@mmstat.org"
-        git config user.name "Dimitar Ivanov"
-        git restore --staged charts/sonarqube-dce/
+        git config user.email "actions@github.com"
+        git config user.name "GitHub Actions"
         git add index.yaml sonarqube-dce*.tgz
         git commit -m "[AUTO] New sonarqube-dce Chart version"
-        git push
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: Generate changelog
       id: changelog
