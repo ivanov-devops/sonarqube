@@ -41,15 +41,6 @@ jobs:
       run: |
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-    - name: Update chart version in remote repo
-      run: |
-        git pull origin main
-        git add charts/sonarqube-dce/Chart.yaml
-        git commit -m "[AUTO] update chart version"
-        git push --force
-        git config --global user.email "d.ivanov@mmstat.org"
-        git config --global user.name "Dimitar Ivanov"
-
     - name: Copy chart to gh-pages branch
       run: |
         git fetch origin gh-pages
