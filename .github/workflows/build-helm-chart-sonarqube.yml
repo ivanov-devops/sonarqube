@@ -43,6 +43,7 @@ jobs:
         echo "VERSION=${VERSION}-rc" >> $GITHUB_ENV
 
 
+
     - name: Update chart version
       run: |
         sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
@@ -78,6 +79,18 @@ jobs:
       uses: metcalfc/changelog-generator@v4.1.0
       with:
         myToken: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Create Release
+#      id: create_release
+#      uses: actions/create-release@v1
+#      with:
+#        tag_name: "${{ env.VERSION }}-sonarqube-dce"
+#        release_name: "${{ env.VERSION }}-sonarqube-dce"
+#        body: ${{ steps.Changelog.outputs.changelog }}
+#        draft: false
+#        prerelease: false
+#        commitish: main
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
