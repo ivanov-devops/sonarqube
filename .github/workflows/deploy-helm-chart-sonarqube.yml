@@ -38,7 +38,7 @@ jobs:
       id: Changelog
       uses: metcalfc/changelog-generator@v4.0.1
       with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update chart version
       run: |
