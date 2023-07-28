@@ -2,83 +2,105 @@ name: Build SonarQube
 
 on:
   push:
-    branches: ['main']
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Helm
-      uses: azure/setup-helm@v3
-      with:
-        version: v3.8.1
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.8.1
 
-    - name: Fetch deps
-      run: |
-        helm dependency update charts/sonarqube-dce
+      - name: Fetch deps
+        run: |
+          helm dependency update charts/sonarqube-dce
 
-    - name: Linting Helm
-      run: |
-        helm lint charts/sonarqube-dce/
+      - name: Linting Helm
+        run: |
+          helm lint charts/sonarqube-dce/
 
-    - name: Get new chart version
-      id: version
-      run: |
-        VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e "s/version: //" | \
-        awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( "%d.%d.%d\n", major, minor, patch );}' )
-        echo "CHART_VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: Get new chart version
+        run: |
+          echo "VERSION=$(cat charts/sonarqube-dce/Chart.yaml | grep version | head -1 | sed -e \"s/version: //\" | \
+          awk -F'[.]'  '{ major=$1;minor=$2;patch=$3;patch += 1;minor += patch / 20;patch = patch % 20;printf( \"%d.%d.%d\\n\", major, minor, patch );}' )" \
+          >> $GITHUB_ENV
 
-    - name: Update chart version
-      run: |
-        sed -i 's/^version: .*$/version: '"$CHART_VERSION"'/1' charts/sonarqube-dce/Chart.yaml
+      - name: Update chart version
+        run: |
+          sed -i 's/^version: .*$/version: '"$VERSION"'/1' charts/sonarqube-dce/Chart.yaml
 
-    - name: Debug
-      id: debug
-      run: |
-        echo "CHART_VERSION=${CHART_VERSION}" >> $GITHUB_ENV
+      - name: Debug
+        id: version
+        run: |
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-    - name: Copy chart to gh-pages branch
-      run: |
-        git fetch origin gh-pages
-        git checkout gh-pages -f
-        git checkout main charts/sonarqube-dce/ -f
+      - name: Copy chart to gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages -f
+          git checkout main charts/sonarqube-dce/ -f
 
-    - name: Package and indexing Chart
-      run: |
-        helm dependency update charts/sonarqube-dce/
-        helm package charts/sonarqube-dce/
-        helm repo index .
+      - name: Package and indexing Chart
+        run: |
+          helm dependency update charts/sonarqube-dce/
+          helm package charts/sonarqube-dce/
+          helm repo index .
 
-    - name: Commit to branch
-      run: |
-        git config user.email "d.ivanov@mmstat.org"
-        git config user.name "Dimitar Ivanov"
-        git restore --staged charts/sonarqube-dce/
-        git add index.yaml sonarqube-dce*.tgz
-        git commit -m "[AUTO] New sonarqube-dce Chart version"
-        git push
+      - name: Commit to branch
+        run: |
+          git config user.email "d.ivanov@mmstat.org"
+          git config user.name "Dimitar Ivanov"
+          git restore --staged charts/sonarqube-dce/
+          git add index.yaml sonarqube-dce*.tgz
+          git commit -m "[AUTO] New sonarqube-dce Chart version"
+          git push
 
-    - name: Generate changelog
-      id: changelog
-      uses: metcalfc/changelog-generator@v4.1.0
-      with:
-        myToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get the latest tag
+        id: get_tag
+        run: |
+          latest_tag=$(git describe --abbrev=0 --tags)
+          echo "::set-output name=tag::$latest_tag"
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: "${{ env.CHART_VERSION }}-sonarqube-dce"
-        release_name: "${{ env.CHART_VERSION }}-sonarqube-dce"
-        body: ${{ steps.Changelog.outputs.changelog }}
-        draft: false
-        prerelease: false
-        commitish: main
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Calculate next version
+        id: calculate_version
+        run: |
+          version="${{ steps.get_tag.outputs.tag }}"
+          IFS='.' read -r major minor patch <<< "$version"
+          patch=$((patch + 1))
+          next_version="$major.$minor.$patch"
+          echo "::set-output name=next_version::$next_version"
+
+      - name: Create new tag
+        if: ${{ steps.calculate_version.outputs.next_version != '' }}
+        run: |
+          next_version="${{ steps.calculate_version.outputs.next_version }}"
+          git tag "$next_version"
+          git push origin "$next_version"
+
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.1.0
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "${{ env.VERSION }}-sonarqube-dce"
+          release_name: "${{ env.VERSION }}-sonarqube-dce"
+          body: ${{ steps.Changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+          commitish: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
