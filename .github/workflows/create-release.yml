@@ -1,10 +1,11 @@
 name: create-release
+
 on:
   push:
-  branches:
-    - main
+    branches:
+      - main
     tags:
-      - '*' # Push events to matching *, i.e. v1.0, v4.1.0
+      - '*' # Push events to matching *, i.e. 1.0, 4.1.0
 
 jobs:
   release:
