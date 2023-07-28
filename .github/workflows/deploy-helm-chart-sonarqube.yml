@@ -1,6 +1,10 @@
 name: Deploy SonarQube
 
 on:
+  workflow_run:
+    workflows: ["Build SonarQube"]
+    types:
+      - completed
   push:
     branches:
       - main
