@@ -19,7 +19,6 @@ jobs:
       uses: azure/setup-helm@v3
       with:
         version: v3.8.1
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Fetch deps
       run: |
@@ -49,8 +48,6 @@ jobs:
         git fetch origin gh-pages
         git checkout gh-pages -f
         git checkout main charts/sonarqube-dce/ -f
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Package and indexing Chart
       run: |
