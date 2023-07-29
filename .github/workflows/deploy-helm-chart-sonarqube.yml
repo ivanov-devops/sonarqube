@@ -38,6 +38,7 @@ jobs:
 
   deploy:
     needs: wait-for-pages-build
+    if: needs.wait-for-pages-build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Set up Kubernetes
