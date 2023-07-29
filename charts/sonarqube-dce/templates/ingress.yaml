@@ -15,7 +15,7 @@ metadata:
 {{- end }}
 {{- if .Values.ingress.annotations }}
   annotations:
-    {{ .Values.ingress.annotations | toYaml | trimSuffix "\n" | indent 4 }}
+{{ .Values.ingress.annotations | toYaml | trimSuffix "\n" | indent 4 }}
 {{- end }}
 spec:
   ingressClassName: nginx
