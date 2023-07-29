@@ -26,14 +26,12 @@ jobs:
         run: |
           echo "Getting pages-build-deployment workflow status..."
           response=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/yourusername/yourrepository/actions/workflows/pages-build-deployment/runs/${{ github.event.workflow_run.id }}")
+            "https://api.github.com/repos/ivanov-devops/sonarqube/actions/workflows/pages-build-deployment/runs/${{ github.event.workflow_run.id }}")
           outcome=$(echo "$response" | jq -r '.conclusion // empty')
           if [ "$outcome" = "success" ]; then
-            echo "pages-build-deployment workflow was successful."
-            echo "::set-output name=deploy::true"
+            echo "pages-build-deployment workflow was successful." > deploy_status.txt
           else
-            echo "pages-build-deployment workflow was not successful."
-            echo "::set-output name=deploy::false"
+            echo "pages-build-deployment workflow was not successful." > deploy_status.txt
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,3 +52,16 @@ jobs:
           helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
         env:
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Read deploy status from file and mark job as success
+        if: always()
+        run: |
+          echo "Reading deploy status..."
+          cat deploy_status.txt
+          if grep -q "successful" deploy_status.txt; then
+            echo "Deployment was successful!"
+            echo "deploy=true" >> $GITHUB_ENV
+          else
+            echo "Deployment was not successful!"
+            echo "deploy=false" >> $GITHUB_ENV
+          fi
