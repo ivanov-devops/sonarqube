@@ -18,7 +18,7 @@ jobs:
           owner: ivanov-devops
           repo: sonarqube
           run_id: ${{ github.event.workflow_run.id }}
-          mediaType: { "previews": ["antiope"] }
+          mediaType: '{"previews": ["antiope"]}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check if pages-build-deployment workflow was successful
