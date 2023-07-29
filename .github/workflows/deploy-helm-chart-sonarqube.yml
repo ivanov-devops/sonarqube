@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Wait for "pages-build-deployment" workflow to complete
       id: wait-pages-build
-      uses: actions/github-script@v5
+      uses: actions/github@v5
       with:
         github-token: ${{ github.token }}
         script: |
@@ -23,7 +23,7 @@ jobs:
           console.log(`Waiting for the "pages-build-deployment" workflow (run ID: ${runID}) in branch ${branch} of repository ${repo} to complete...`);
 
           async function getWorkflowRunStatus() {
-            const response = await octokit.actions.getWorkflowRun({
+            const response = await github.rest.actions.getWorkflowRun({
               owner: repo.split("/")[0],
               repo: repo.split("/")[1],
               run_id: runID
