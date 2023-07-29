@@ -39,7 +39,6 @@ jobs:
         run: |
           mkdir ${HOME}/.kube
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-          chmod 600 ${HOME}/.kube/config
           cat ${HOME}/.kube/config
 
       - name: Install Helm Chart
