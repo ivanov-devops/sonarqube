@@ -7,8 +7,7 @@ on:
       - completed
 
 jobs:
-  deploy:
-    needs: pages-build-deployment
+  wait-for-pages-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +42,11 @@ jobs:
           console.log(`Final status: ${status}`);
           console.log(`"pages-build-deployment" workflow (run ID: ${runID}) completed!`);
 
+  deploy:
+    needs: wait-for-pages-build
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Set up Kubernetes
       run: |
         mkdir ${HOME}/.kube
