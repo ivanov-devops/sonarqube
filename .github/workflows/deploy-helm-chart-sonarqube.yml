@@ -12,23 +12,20 @@ jobs:
     steps:
       - name: Wait for pages-build-deployment workflow to complete
         id: wait
-        uses: actions/github-script@v5
+        uses: octokit/request-action@v2.x
         with:
-          script: |
-            const response = await octokit.actions.getWorkflowRun({
-              owner: 'ivanov-devops',
-              repo: 'sonarqube',
-              run_id: 5697516146 // Replace with the actual run ID of pages-build-deployment workflow
-            });
-            console.log(`pages-build-deployment workflow outcome: ${response.data.conclusion}`);
-            return response.data.conclusion;
+          route: GET /repos/:owner/:repo/actions/runs/:run_id
+          owner: ivanov-devops
+          repo: sonarqube
+          run_id: ${{ needs.deploy.outputs.pages-build-deployment-id }}
+          mediaType: { "previews": ["antiope"] }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: wait-for-pages-build
     runs-on: ubuntu-latest
-
+    outputs:
+      pages-build-deployment-id: ${{ github.event.workflow_run.id }}
     steps:
       - name: Set up Kubernetes
         run: |
