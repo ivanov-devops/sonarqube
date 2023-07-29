@@ -12,34 +12,41 @@ jobs:
 
     steps:
       - name: Wait for pages-build-deployment workflow to complete
-        uses: octokit/request-action@v2.x
         id: wait
-        with:
-          route: GET /repos/:repository/actions/workflows/{workflow_id}/runs/{run_id}
-          repository: yourusername/yourrepository   # Replace with your actual GitHub repository name
-          workflow_id: ${{ github.event.workflow_run.workflow_id }}
-          run_id: ${{ github.event.workflow_run.id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if pages-build-deployment workflow was successful
-        run: echo "pages-build-deployment workflow outcome: ${{ steps.wait.outputs.workflow_run_conclusion }}"
-        if: steps.wait.outputs.workflow_run_conclusion == 'success'
+        run: echo "No need to run any commands here, this job is just for waiting."
+        timeout-minutes: 30
 
   deploy:
     needs: wait-for-pages-build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Kubernetes
+      - name: Check if pages-build-deployment workflow was successful
+        id: check
+        run: |
+          echo "Getting pages-build-deployment workflow status..."
+          response=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/yourusername/yourrepository/actions/workflows/pages-build-deployment/runs/${{ github.event.workflow_run.id }}")
+          outcome=$(echo "$response" | jq -r '.conclusion // empty')
+          if [ "$outcome" = "success" ]; then
+            echo "pages-build-deployment workflow was successful."
+            echo "::set-output name=deploy::true"
+          else
+            echo "pages-build-deployment workflow was not successful."
+            echo "::set-output name=deploy::false"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+
+      - name: Deploy SonarQube Helm Chart
+        if: steps.check.outputs.deploy == 'true'
         run: |
           mkdir ${HOME}/.kube
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
           chmod 600 ${HOME}/.kube/config
           cat ${HOME}/.kube/config
 
-      - name: Install Helm Chart
-        run: |
           helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
           helm repo update
           kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
