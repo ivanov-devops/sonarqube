@@ -33,7 +33,6 @@ jobs:
 
   deploy:
     needs: wait-for-pages-build
-    if: env.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Set up Kubernetes
