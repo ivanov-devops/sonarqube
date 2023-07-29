@@ -13,34 +13,29 @@ jobs:
     steps:
     - name: Wait for "pages-build-deployment" workflow to complete
       id: wait-pages-build
-      uses: actions/github@v5
-      with:
-        github-token: ${{ github.token }}
-        script: |
-          const runID = "${{ github.event.workflow_run.id }}";
-          const branch = "${{ github.event.workflow_run.head_branch }}";
-          const repo = "${{ github.event.workflow_run.head_repository.full_name }}";
-          console.log(`Waiting for the "pages-build-deployment" workflow (run ID: ${runID}) in branch ${branch} of repository ${repo} to complete...`);
+      run: |
+        echo "Waiting for the 'pages-build-deployment' workflow to complete..."
+        repo="${{ github.event.repository.full_name }}"
+        runID="${{ github.event.workflow_run.id }}"
 
-          async function getWorkflowRunStatus() {
-            const response = await github.rest.actions.getWorkflowRun({
-              owner: repo.split("/")[0],
-              repo: repo.split("/")[1],
-              run_id: runID
-            });
+        # Get the status of the workflow run
+        status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/$repo/actions/runs/$runID" | jq -r '.status')
 
-            return response.data.status;
-          }
+        while [[ "$status" == "queued" || "$status" == "in_progress" ]]; do
+          echo "Current status: $status"
+          sleep 5
+          status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/$repo/actions/runs/$runID" | jq -r '.status')
+        done
 
-          let status = await getWorkflowRunStatus();
-          while (status === "queued" || status === "in_progress") {
-            console.log(`Current status: ${status}`);
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
-            status = await getWorkflowRunStatus();
-          }
+        echo "Final status: $status"
+        echo "'pages-build-deployment' workflow (run ID: $runID) completed!"
 
-          console.log(`Final status: ${status}`);
-          console.log(`"pages-build-deployment" workflow (run ID: ${runID}) completed!`);
+        if [[ "$status" != "completed" ]]; then
+          echo "Error: 'pages-build-deployment' workflow did not complete successfully."
+          exit 1
+        fi
 
   deploy:
     needs: wait-for-pages-build
