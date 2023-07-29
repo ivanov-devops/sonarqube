@@ -8,31 +8,52 @@ on:
 
 jobs:
   deploy:
-    needs: pages-build-deployment.post-job
+    needs: pages-build-deployment
     runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for "pages-build-deployment" to complete
-        # This step will wait for the "deployment-done" output from the "pages-build-deployment" workflow.
-        # The script will loop until the output is available, then exit, allowing the deployment to proceed.
-        run: |
-          echo "Waiting for 'pages-build-deployment' to complete..."
-          while [[ -z "${{ needs.pages-build-deployment.outputs.deployment-done }}" ]]; do
-            sleep 10
-          done
-          echo "'pages-build-deployment' has completed. Proceeding with the deployment."
+    - name: Wait for "pages-build-deployment" workflow to complete
+      id: wait-pages-build
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const runID = "${{ github.event.workflow_run.id }}";
+          const branch = "${{ github.event.workflow_run.head_branch }}";
+          const repo = "${{ github.event.workflow_run.head_repository.full_name }}";
+          console.log(`Waiting for the "pages-build-deployment" workflow (run ID: ${runID}) in branch ${branch} of repository ${repo} to complete...`);
 
-      - name: Set up Kubernetes
-        run: |
-          mkdir ${HOME}/.kube
-          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-          cat ${HOME}/.kube/config
+          async function getWorkflowRunStatus() {
+            const response = await octokit.actions.getWorkflowRun({
+              owner: repo.split("/")[0],
+              repo: repo.split("/")[1],
+              run_id: runID
+            });
 
-      - name: Install Helm Chart
-        run: |
-          helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
-          helm repo update
-          # kubectl create namespace sonarqube-dce
-          kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
-          export JWT_SECRET=${{ secrets.JWT_SECRET }}
-          helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
+            return response.data.status;
+          }
+
+          let status = await getWorkflowRunStatus();
+          while (status === "queued" || status === "in_progress") {
+            console.log(`Current status: ${status}`);
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+            status = await getWorkflowRunStatus();
+          }
+
+          console.log(`Final status: ${status}`);
+          console.log(`"pages-build-deployment" workflow (run ID: ${runID}) completed!`);
+
+    - name: Set up Kubernetes
+      run: |
+        mkdir ${HOME}/.kube
+        echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+        cat ${HOME}/.kube/config
+
+    - name: Install Helm Chart
+      run: |
+        helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
+        helm repo update
+        #kubectl create namespace sonarqube-dce
+        kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
+        export JWT_SECRET=${{ secrets.JWT_SECRET }}
+        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
