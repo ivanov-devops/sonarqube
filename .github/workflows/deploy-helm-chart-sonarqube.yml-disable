@@ -8,7 +8,6 @@ on:
 
 jobs:
   deploy:
-    needs: pages-build-deployment
     runs-on: ubuntu-latest
 
     steps:
