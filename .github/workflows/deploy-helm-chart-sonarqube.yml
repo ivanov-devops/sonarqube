@@ -30,15 +30,17 @@ jobs:
           outcome=$(echo "$response" | jq -r '.conclusion // empty')
           if [ "$outcome" = "success" ]; then
             echo "pages-build-deployment workflow was successful." > deploy_status.txt
+            echo "deploy=true" >> $GITHUB_ENV
           else
             echo "pages-build-deployment workflow was not successful." > deploy_status.txt
+            echo "deploy=false" >> $GITHUB_ENV
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
 
       - name: Deploy SonarQube Helm Chart
-        if: steps.check.outputs.deploy == 'true'
+        if: env.deploy == 'true'
         run: |
           mkdir ${HOME}/.kube
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
@@ -52,16 +54,3 @@ jobs:
           helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
         env:
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
-
-      - name: Read deploy status from file and mark job as success
-        if: always()
-        run: |
-          echo "Reading deploy status..."
-          cat deploy_status.txt
-          if grep -q "successful" deploy_status.txt; then
-            echo "Deployment was successful!"
-            echo "deploy=true" >> $GITHUB_ENV
-          else
-            echo "Deployment was not successful!"
-            echo "deploy=false" >> $GITHUB_ENV
-          fi
