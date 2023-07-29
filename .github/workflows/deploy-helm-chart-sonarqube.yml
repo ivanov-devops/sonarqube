@@ -14,31 +14,26 @@ jobs:
         id: wait
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/:owner/:repo/actions/runs/:run_id
-          owner: ivanov-devops
-          repo: sonarqube
-          run_id: ${{ github.event.workflow_run.id }}
+          route: GET /repos/ivanov-devops/sonarqube/actions/runs/${{ github.event.workflow_run.id }}
           mediaType: '{"previews": ["antiope"]}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check if pages-build-deployment workflow was successful
         run: |
           echo "Getting pages-build-deployment workflow status..."
-          outcome=$(echo "${{ steps.wait.outputs.response }}" | jq -r '.conclusion // empty')
+          outcome=$(echo "${{ steps.wait.outputs.response_data }}" | jq -r '.conclusion // empty')
           if [ "$outcome" = "success" ]; then
             echo "pages-build-deployment workflow was successful."
-            echo "::set-output name=deploy::true"
+            echo "deploy=true" >> $GITHUB_ENV
           else
             echo "pages-build-deployment workflow was not successful."
-            echo "::set-output name=deploy::false"
+            echo "deploy=false" >> $GITHUB_ENV
           fi
         shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: wait-for-pages-build
-    if: needs.wait-for-pages-build.outputs.deploy == 'true'
+    if: env.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Set up Kubernetes
