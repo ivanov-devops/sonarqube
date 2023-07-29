@@ -323,12 +323,12 @@ ingress:
   hosts:
     - name: sonarqube.local
   #     Different clouds or configurations might need /* as the default path
-      path: /
+      path: "/"
       # For additional control over serviceName and servicePort
-      # serviceName: someService
-      # servicePort: somePort
+      serviceName: sonarqube-sonarqube-dce
+      servicePort: 9000
       # the pathType can be one of the following values: Exact|Prefix|ImplementationSpecific(default)
-      # pathType: ImplementationSpecific
+      pathType: Prefix
   annotations:
   # kubernetes.io/tls-acme: "true"
   # This property allows for reports up to a certain size to be uploaded to SonarQube

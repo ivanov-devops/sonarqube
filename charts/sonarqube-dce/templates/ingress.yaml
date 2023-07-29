@@ -11,30 +11,23 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- if .Values.ingress.labels }}
-{{ .Values.ingress.labels | toYaml | trimSuffix "\n"| indent 4 -}}
-{{- end}}
-{{- if .Values.ingress.annotations}}
+{{ .Values.ingress.labels | toYaml | trimSuffix "\n" | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.annotations }}
   annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
+    {{ .Values.ingress.annotations | toYaml | trimSuffix "\n" | indent 4 }}
 {{- end }}
 spec:
+  ingressClassName: nginx
   rules:
-  {{- range .Values.ingress.hosts }}
-  - host: {{ printf "%s" .name }}
-    http:
-      paths:
-      - backend:
-          service:
-            name: {{ default $serviceName .serviceName }}
-            port:
-              number: {{ default $servicePort .servicePort }}
-        path: {{ .path | default (include "sonarqube.webcontext" $) }}
-        pathType: {{ default "ImplementationSpecific" .pathType }}
-  {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-{{ toYaml .Values.ingress.tls | indent 4 }}
-  {{- end -}}
+    - host: {{ (index .Values.ingress.hosts 0).name }}
+      http:
+        paths:
+          - path: {{ (index .Values.ingress.hosts 0).path }}
+            pathType: {{ (index .Values.ingress.hosts 0).pathType }}
+            backend:
+              service:
+                name: {{ (index .Values.ingress.hosts 0).serviceName | default "sonarqube-sonarqube-dce" }}
+                port:
+                  number: {{ (index .Values.ingress.hosts 0).servicePort | default 9000 }}
 {{- end }}
