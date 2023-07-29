@@ -319,33 +319,15 @@ service:
   # loadBalancerIP: 1.2.3.4
 ingress:
   enabled: true
-  # Used to create an Ingress record.
   hosts:
     - name: sonarqube.local
-  #     Different clouds or configurations might need /* as the default path
       path: "/"
-      # For additional control over serviceName and servicePort
+      pathType: Prefix
       serviceName: sonarqube-sonarqube-dce
       servicePort: 9000
-      # the pathType can be one of the following values: Exact|Prefix|ImplementationSpecific(default)
-      pathType: Prefix
-  annotations:
-  # kubernetes.io/tls-acme: "true"
-  # This property allows for reports up to a certain size to be uploaded to SonarQube
-    nginx.ingress.kubernetes.io/proxy-body-size: "64m"
-
-  # Set the ingressClassName on the ingress record
-    ingressClassName: nginx
-
-# Additional labels for Ingress manifest file
-  # labels:
-  #  traffic-type: external
-  #  traffic-type: internal
-  tls: []
-  # Secrets must be manually created in the namespace. To generate a self-signed certificate (and private key) and then create the secret in the cluster please refer to official documentation available at https://kubernetes.github.io/ingress-nginx/user-guide/tls/#tls-secrets
-  # - secretName: chart-example-tls
-  #   hosts:
-  #     - chart-example.local
+  labels:  # Add labels here if needed
+    app: sonarqube
+  annotations:  # Add annotations here if needed
 
 # Affinity for pod assignment
 # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
