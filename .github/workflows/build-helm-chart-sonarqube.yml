@@ -87,3 +87,8 @@ jobs:
           commitish: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    post-job:
+      runs-on: ubuntu-latest
+      outputs:
+        deployment-done: true

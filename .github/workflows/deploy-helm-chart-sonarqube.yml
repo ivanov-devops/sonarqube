@@ -8,21 +8,31 @@ on:
 
 jobs:
   deploy:
-    needs: pages-build-deployment
+    needs: pages-build-deployment.post-job
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up Kubernetes
-      run: |
-        mkdir ${HOME}/.kube
-        echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-        cat ${HOME}/.kube/config
+      - name: Wait for "pages-build-deployment" to complete
+        # This step will wait for the "deployment-done" output from the "pages-build-deployment" workflow.
+        # The script will loop until the output is available, then exit, allowing the deployment to proceed.
+        run: |
+          echo "Waiting for 'pages-build-deployment' to complete..."
+          while [[ -z "${{ needs.pages-build-deployment.outputs.deployment-done }}" ]]; do
+            sleep 10
+          done
+          echo "'pages-build-deployment' has completed. Proceeding with the deployment."
 
-    - name: Install Helm Chart
-      run: |
-        helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
-        helm repo update
-        #kubectl create namespace sonarqube-dce
-        kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
-        export JWT_SECRET=${{ secrets.JWT_SECRET }}
-        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
+      - name: Set up Kubernetes
+        run: |
+          mkdir ${HOME}/.kube
+          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          cat ${HOME}/.kube/config
+
+      - name: Install Helm Chart
+        run: |
+          helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
+          helm repo update
+          # kubectl create namespace sonarqube-dce
+          kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
+          export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
