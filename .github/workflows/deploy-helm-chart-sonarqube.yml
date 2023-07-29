@@ -2,7 +2,7 @@ name: Deploy SonarQube
 
 on:
   workflow_run:
-    workflows: ["Build SonarQube"]
+    workflows: ["pages-build-deployment"]
     types:
       - completed
 
@@ -11,48 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Wait for "pages-build-deployment" workflow to complete
-      id: wait-pages-build
-      run: |
-        echo "Waiting for the 'pages-build-deployment' workflow to complete..."
-        repo="${{ github.event.repository.full_name }}"
-        runID="${{ github.event.workflow_run.id }}"
+      - name: Wait for pages-build-deployment workflow to complete
+        uses: octokit/request-action@v2.x
+        id: wait
+        with:
+          route: GET /repos/:repository/actions/workflows/{workflow_id}/runs/{run_id}
+          repository: yourusername/yourrepository   # Replace with your actual GitHub repository name
+          workflow_id: ${{ github.event.workflow_run.workflow_id }}
+          run_id: ${{ github.event.workflow_run.id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        # Get the status of the workflow run
-        status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/$repo/actions/runs/$runID" | jq -r '.status')
-
-        while [[ "$status" == "queued" || "$status" == "in_progress" ]]; do
-          echo "Current status: $status"
-          sleep 5
-          status=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/$repo/actions/runs/$runID" | jq -r '.status')
-        done
-
-        echo "Final status: $status"
-        echo "'pages-build-deployment' workflow (run ID: $runID) completed!"
-
-        if [[ "$status" != "completed" ]]; then
-          echo "Error: 'pages-build-deployment' workflow did not complete successfully."
-          exit 1
-        fi
+      - name: Check if pages-build-deployment workflow was successful
+        run: echo "pages-build-deployment workflow outcome: ${{ steps.wait.outputs.workflow_run_conclusion }}"
+        if: steps.wait.outputs.workflow_run_conclusion == 'success'
 
   deploy:
     needs: wait-for-pages-build
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up Kubernetes
-      run: |
-        mkdir ${HOME}/.kube
-        echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-        cat ${HOME}/.kube/config
+      - name: Set up Kubernetes
+        run: |
+          mkdir ${HOME}/.kube
+          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          chmod 600 ${HOME}/.kube/config
+          cat ${HOME}/.kube/config
 
-    - name: Install Helm Chart
-      run: |
-        helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
-        helm repo update
-        #kubectl create namespace sonarqube-dce
-        kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
-        export JWT_SECRET=${{ secrets.JWT_SECRET }}
-        helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
+      - name: Install Helm Chart
+        run: |
+          helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
+          helm repo update
+          kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
+          export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
