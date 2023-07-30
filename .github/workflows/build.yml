@@ -13,16 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    steps:
-      - name: Resolve DNS and Set Environment Variable
-        run: |
-          set -x  # Enable debug mode
-          dns_name="sonarqube.local"
-          echo "Resolving DNS for $dns_name"
-          resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
-          echo "Resolved IP: $resolved_ip"
-          echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
+      SONAR_HOST_URL: "35.189.200.234"  # Replace this with your actual SonarQube server IP
 
+    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
