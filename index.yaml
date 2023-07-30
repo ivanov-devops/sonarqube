@@ -28,7 +28,7 @@ entries:
           url: https://github.com/SonarSource/helm-chart-sonarqube/tree/master/charts/sonarqube-dce
     apiVersion: v2
     appVersion: 10.1.0
-    created: "2023-07-30T16:24:24.748269039Z"
+    created: "2023-07-30T16:27:29.415158328Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -44,7 +44,7 @@ entries:
       you perform continuous code inspections of your projects. The tool analyses
       30+ different programming languages and integrates into your CI pipeline and
       DevOps platform to ensure that your code meets high-quality standards.
-    digest: 42b7eefa2de0ba4420e3e84f2a687afe8c242b131c6702dab7215eb59979a68b
+    digest: f9747c049fa5b092162c34e2e2fcb1b764a45d46b1916da74127f6d0f1ce8aaa
     home: https://www.sonarqube.org/
     icon: https://raw.githubusercontent.com/SonarSource/sonarqube-static-resources/master/helm/SonarQubeLogo.svg
     keywords:
@@ -71,4 +71,4 @@ entries:
     urls:
     - sonarqube-dce-10.2.0.tgz
     version: 10.2.0
-generated: "2023-07-30T16:24:24.736781847Z"
+generated: "2023-07-30T16:27:29.40273264Z"
