@@ -11,9 +11,13 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Resolve DNS and Set Environment Variable
         run: |
+          set -x  # Enable debug mode
           dns_name="sonarqube.local"
           echo "Resolving DNS for $dns_name"
           resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
@@ -24,10 +28,12 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+      - name: Print Environment Variables
+        run: |
+          echo "SONAR_HOST_URL: $SONAR_HOST_URL"
+          echo "SONAR_TOKEN: $SONAR_TOKEN"
+
       - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}  # Use the resolved IP here
         run: |
           set -x  # Enable debug mode
           docker run --name sonarqube-scan \
