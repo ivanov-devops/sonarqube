@@ -24,9 +24,8 @@ spec:
     - {{ (index .Values.ingress.hosts 0).name }}
     secretName: {{ (index .Values.ingress.hosts 0).tls }}
 {{- if .Values.ingress.customCACert }}
-    caCertificate: # Use the secret containing the CA certificate
-      secretName: ingress-ca
-      key: k8s_ca.pem
+  - secretName: ingress-ca # Use the secret containing the CA certificate
+    key: k8s_ca.pem
 {{- end }}
   rules:
     - host: {{ (index .Values.ingress.hosts 0).name }}

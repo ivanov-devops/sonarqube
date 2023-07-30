@@ -289,3 +289,10 @@ Set sonarqube.webcontext, ensuring it starts and ends with a slash, in order to 
 {{- end -}}
 {{ printf "%s" $tempWebcontext }}
 {{- end -}}
+
+{{/*
+Generate a placeholder for the caBundle field.
+*/}}
+{{- define "sonarqube.caBundlePlaceholder" -}}
+BASE64_ENCODED_CONTENT
+{{- end }}
