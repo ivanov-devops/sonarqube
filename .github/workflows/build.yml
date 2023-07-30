@@ -33,6 +33,7 @@ jobs:
           set -x  # Enable debug mode
           docker run --name sonarqube-scan \
             -e "SONAR_TOKEN=$SONAR_TOKEN" \
+            -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
             -v "$(pwd):/github/workspace" \
             -v "$(pwd)/custom-hosts:/etc/hosts" \
             sonarsource/sonarqube-scan-action@master
