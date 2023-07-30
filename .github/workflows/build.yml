@@ -16,6 +16,7 @@ jobs:
         run: |
           dns_name="sonarqube.local"
           resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
+          mkdir -p /github/workspace
           echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
           echo "SONAR_HOST_URL=$resolved_ip" >> /github/workspace/.env
 
