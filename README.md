@@ -1,6 +1,7 @@
 ## Usage
 this repository is a fork from official repository
-https://github.com/SonarSource/sonarqube
+https://github.com/SonarSource/helm-chart-sonarqube/tree/master/charts/sonarqube-dce
+
 
 install git \
 download the repository \
