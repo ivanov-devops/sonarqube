@@ -33,6 +33,7 @@ jobs:
           SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          echo "Resolved IP for SONAR_HOST_URL: $SONAR_HOST_URL"
           docker run --name sonarqube-scan \
             -e "SONAR_TOKEN=$SONAR_TOKEN" \
             -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
