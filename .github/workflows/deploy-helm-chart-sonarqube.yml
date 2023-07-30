@@ -1,10 +1,13 @@
 name: Deploy SonarQube
 
 on:
-  workflow_run:
-    workflows: ["pages-build-deployment"]
-    types:
-      - completed
+  workflow_dispatch:  # This event allows manual triggering
+
+#on:
+#  workflow_run:
+#    workflows: ["pages-build-deployment"]
+#    types:
+#      - completed
 
 jobs:
   wait-for-pages-build:

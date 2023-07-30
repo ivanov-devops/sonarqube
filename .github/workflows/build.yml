@@ -11,32 +11,28 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: "http://sonarqube.local"  # This can remain as the DNS name
 
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+
+      - name: Resolve DNS name to IP
+        run: |
+          dns_name="sonarqube.local"
+          resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
+          echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
 
       - name: Print Environment Variables
         run: |
           echo "SONAR_HOST_URL: $SONAR_HOST_URL"
           echo "SONAR_TOKEN: $SONAR_TOKEN"
 
-      - name: Create custom hosts file
-        run: echo "35.189.200.234 sonarqube.local" > custom-hosts
-
       - name: SonarQube Scan
         run: |
-          set -x  # Enable debug mode
           docker run --name sonarqube-scan \
             -e "SONAR_TOKEN=$SONAR_TOKEN" \
             -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
             -v "$(pwd):/github/workspace" \
-            -v "$(pwd)/custom-hosts:/etc/hosts" \
             sonarsource/sonarqube-scan-action@master
           shell: /usr/bin/bash -e {0}
-          env:
-            SONAR_HOST_URL: $SONAR_HOST_URL
