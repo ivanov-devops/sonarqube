@@ -25,10 +25,9 @@ jobs:
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
         run: |
+          echo "SONAR_HOST_URL=${SONAR_HOST_URL}" >> /github/workspace/.env
           /usr/bin/docker run --name sonarqube-scan \
-            -e "SONAR_TOKEN=${SONAR_TOKEN}" \
-            -e "SONAR_HOST_URL=${SONAR_HOST_URL}" \
+            --env-file /github/workspace/.env \
             -v "$(pwd):/github/workspace" \
             sonarsource/sonarqube-scan-action@master
