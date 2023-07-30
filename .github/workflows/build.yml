@@ -12,11 +12,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve DNS and Create Environment File
+      - name: Resolve DNS and Set Environment Variable
         run: |
           dns_name="sonarqube.local"
           resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
-          echo "SONAR_HOST_URL=$resolved_ip" > env_file
+          echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
         with:
@@ -28,5 +28,3 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
-        env_files:
-          - ./env_file
