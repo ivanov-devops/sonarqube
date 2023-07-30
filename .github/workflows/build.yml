@@ -17,7 +17,6 @@ jobs:
           dns_name="sonarqube.local"
           resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
           echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
-          echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_WORKSPACE/.env
 
       - uses: actions/checkout@v2
         with:
@@ -26,8 +25,10 @@ jobs:
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}  # Use the resolved IP as the value
         run: |
           /usr/bin/docker run --name sonarqube-scan \
-            --env-file $GITHUB_WORKSPACE/.env \
+            -e "SONAR_TOKEN=${SONAR_TOKEN}" \
+            -e "SONAR_HOST_URL=${SONAR_HOST_URL}" \
             -v "$(pwd):/github/workspace" \
             sonarsource/sonarqube-scan-action@master
