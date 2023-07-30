@@ -1,11 +1,10 @@
-name: Build SonarQube
+name: Build Helm Chart SonarQube
 
 on:
-  workflow_dispatch:  # This event allows manual triggering
-#on:
-#  push:
-#    branches:
-#      - main
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
 
 jobs:
   build:
