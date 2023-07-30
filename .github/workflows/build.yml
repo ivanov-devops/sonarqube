@@ -1,4 +1,4 @@
-name: Build
+name: SonarQube Scan
 
 on:
   push:
@@ -8,34 +8,24 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build:
-    name: Build
+  sonarqube_scan:
+    name: SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Resolve DNS name to IP
-        run: |
-          dns_name="sonarqube.local"
-          resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
-          echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
+      - name: Create hosts file
+        run: echo "35.189.200.234 sonarqube.local" > hosts
 
-      - name: Print Environment Variables
+      - name: SonarQube Scanner
         run: |
-          echo "SONAR_HOST_URL: $SONAR_HOST_URL"
-          echo "SONAR_TOKEN: $SONAR_TOKEN"
-
-      - name: SonarQube Scan
-        env:
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          echo "Resolved IP for SONAR_HOST_URL: $SONAR_HOST_URL"
-          docker run --name sonarqube-scan \
-            -e "SONAR_TOKEN=$SONAR_TOKEN" \
-            -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
-            -v "$(pwd):/github/workspace" \
-            sonarsource/sonarqube-scan-action@master
+          docker run \
+            --rm \
+            -e SONAR_HOST_URL="http://sonarqube.local" \
+            -e SONAR_SCANNER_OPTS="-Dsonar.projectKey=sonarqube-helm-chart-github" \
+            -e SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}" \
+            -v "$(pwd):/usr/src" \
+            -v "$(pwd)/hosts:/etc/hosts" \   # Mount the hosts file into the container
+            sonarsource/sonar-scanner-cli

@@ -1,0 +1,6 @@
+projectKey=sonarqube-helm-chart-github
+serverUrl=http://sonarqube.local
+serverVersion=10.1.0.73491
+dashboardUrl=http://sonarqube.local/dashboard?id=sonarqube-helm-chart-github
+ceTaskId=AYmn8S1HbqJxkQD3Mz7I
+ceTaskUrl=http://sonarqube.local/api/ce/task?id=AYmn8S1HbqJxkQD3Mz7I
