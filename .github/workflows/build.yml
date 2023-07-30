@@ -11,9 +11,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Resolve DNS and Set Environment Variable
         run: |
@@ -34,6 +31,9 @@ jobs:
           echo "SONAR_TOKEN: $SONAR_TOKEN"
 
       - name: SonarQube Scan
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -x  # Enable debug mode
           docker run --name sonarqube-scan \
