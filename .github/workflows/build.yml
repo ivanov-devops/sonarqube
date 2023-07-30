@@ -25,8 +25,7 @@ jobs:
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}  # Use the resolved IP as the value
-        run: >
+        run: |
           docker run --name sonarqube-scan \
             -e "SONAR_TOKEN=${SONAR_TOKEN}" \
             -e "SONAR_HOST_URL=${SONAR_HOST_URL}" \
