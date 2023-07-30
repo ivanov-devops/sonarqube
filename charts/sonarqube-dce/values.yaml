@@ -46,7 +46,7 @@ searchNodes:
     # A User Password that will be used to authenticate against the Search Cluster
     userPassword: ""
 
-  replicaCount: 3
+  replicaCount: 4
 
   # Pod Distribution Budget for search nodes
   podDistributionBudget:
