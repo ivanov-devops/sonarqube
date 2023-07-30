@@ -31,9 +31,6 @@ jobs:
           echo "SONAR_TOKEN: $SONAR_TOKEN"
 
       - name: SonarQube Scan
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -x  # Enable debug mode
           docker run --name sonarqube-scan \
