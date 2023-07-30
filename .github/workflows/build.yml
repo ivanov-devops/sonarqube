@@ -15,7 +15,9 @@ jobs:
       - name: Resolve DNS and Set Environment Variable
         run: |
           dns_name="sonarqube.local"
+          echo "Resolving DNS for $dns_name"
           resolved_ip=$(nslookup $dns_name | awk '/^Address: / { print $2 }')
+          echo "Resolved IP: $resolved_ip"
           echo "SONAR_HOST_URL=$resolved_ip" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
@@ -25,9 +27,11 @@ jobs:
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}  # Use the resolved IP here
         run: |
+          set -x  # Enable debug mode
           docker run --name sonarqube-scan \
-            -e "SONAR_TOKEN=${{ secrets.SONAR_TOKEN }}" \
-            -e "SONAR_HOST_URL=${{ env.SONAR_HOST_URL }}" \
+            -e "SONAR_TOKEN=$SONAR_TOKEN" \
+            -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
             -v "$(pwd):/github/workspace" \
             sonarsource/sonarqube-scan-action@master
