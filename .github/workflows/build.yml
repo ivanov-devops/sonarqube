@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: "http://sonarqube.local"  
+      SONAR_HOST_URL: "http://sonarqube.local"  # This can remain as the DNS name
 
     steps:
       - uses: actions/checkout@v2
@@ -32,8 +32,10 @@ jobs:
         run: |
           set -x  # Enable debug mode
           docker run --name sonarqube-scan \
-            --env-file <(echo "SONAR_HOST_URL=http://sonarqube.local") \
             -e "SONAR_TOKEN=$SONAR_TOKEN" \
             -v "$(pwd):/github/workspace" \
             -v "$(pwd)/custom-hosts:/etc/hosts" \
             sonarsource/sonarqube-scan-action@master
+          shell: /usr/bin/bash -e {0}
+          env:
+            SONAR_HOST_URL: $SONAR_HOST_URL
