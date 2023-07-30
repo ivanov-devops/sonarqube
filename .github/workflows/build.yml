@@ -17,9 +17,9 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Set SonarQube IP address
-        run: echo "::set-output name=sonar_ip::${{ secrets.SONAR_HOST_IP }}"
+        run: echo "::set-env name=SONAR_HOST_URL::${{ secrets.SONAR_HOST_IP }}"
 
       - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ steps.set_ip.outputs.sonar_ip }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
