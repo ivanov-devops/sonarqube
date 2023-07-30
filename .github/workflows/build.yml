@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create hosts file
-        run: echo "35.189.200.234 sonarqube.local" > hosts
+        run: echo "35.189.200.234 sonarqube.local" > custom-hosts
 
       - name: SonarQube Scanner
         run: |
@@ -27,5 +27,5 @@ jobs:
             -e SONAR_SCANNER_OPTS="-Dsonar.projectKey=sonarqube-helm-chart-github" \
             -e SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}" \
             -v "$(pwd):/usr/src" \
-            -v "$(pwd)/hosts:/etc/hosts" \   # Mount the hosts file into the container
+            --add-host="sonarqube.local:35.189.200.234" \   # Add custom host resolution
             sonarsource/sonar-scanner-cli
