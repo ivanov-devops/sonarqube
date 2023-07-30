@@ -29,10 +29,12 @@ jobs:
           echo "SONAR_TOKEN: $SONAR_TOKEN"
 
       - name: SonarQube Scan
+        env:
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           docker run --name sonarqube-scan \
             -e "SONAR_TOKEN=$SONAR_TOKEN" \
             -e "SONAR_HOST_URL=$SONAR_HOST_URL" \
             -v "$(pwd):/github/workspace" \
             sonarsource/sonarqube-scan-action@master
-          shell: /usr/bin/bash -e {0}
