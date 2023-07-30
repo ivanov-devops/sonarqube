@@ -40,4 +40,3 @@ spec:
                 port:
                   number: {{ (index .Values.ingress.hosts 0).servicePort | default 9000 }}
 {{- end }}
-{{- end }}
