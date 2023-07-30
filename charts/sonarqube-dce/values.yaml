@@ -92,7 +92,7 @@ searchNodes:
       cpu: 400m
       memory: 2Gi
   persistence:
-    enabled: true
+    enabled: false
     ## Set annotations on pvc
     annotations: {}
 
