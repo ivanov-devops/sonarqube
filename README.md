@@ -24,21 +24,22 @@ If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages.  You can then run `helm search repo
 sonarqube` to see the charts.
 
-you have to define
+you have to create `JWT_SECRET` \
 
 `JWT_SECRET=$(echo -n "your_secret" | openssl dgst -sha256 -hmac "your_key" -binary | base64)`
 To install the sonarqube chart:
-`helm install sonarqube sonarqubesonarqube --values sonarqube/values.yaml`
+`helm install sonarqube sonarqube sonarqube --values <your-custom-values.yaml-file>`
 
-or use the default \
-`
+or use the default configuration\
+
 helm repo add sonarqube https://ivanov-devops.github.io/sonarqube/
 helm repo update
 
-kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
+`kubectl create namespace sonarqube-dce --dry-run=client -o yaml | kubectl apply -f -
 export JWT_SECRET=${{ secrets.JWT_SECRET }}
 helm upgrade --install -n sonarqube-dce sonarqube sonarqube/sonarqube-dce --set ApplicationNodes.jwtSecret=$JWT_SECRET
 `
+
 To uninstall the chart:
 
     helm delete my-sonarqube
