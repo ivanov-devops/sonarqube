@@ -325,10 +325,10 @@ ingress:
       pathType: Prefix
       serviceName: sonarqube-sonarqube-dce
       servicePort: 9000
-      tls: hello-app-tls
   labels:  # Add labels here if needed
     app: sonarqube
   annotations:  # Add annotations here if needed
+  customCACert: true
 
 # Affinity for pod assignment
 # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
