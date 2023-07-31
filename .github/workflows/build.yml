@@ -24,7 +24,7 @@ jobs:
           docker run \
             --rm \
             --add-host=sonarqube.local:35.189.200.234 \
-            -e SONAR_HOST_URL="http://sonarqube.local" \
+            -e SONAR_HOST_URL="https://sonarqube.local" \
             -e SONAR_SCANNER_OPTS="-Dsonar.projectKey=sonarqube-helm-chart-github" \
             -e SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}" \
             -v "$(pwd):/usr/src" \

@@ -141,7 +141,7 @@ ApplicationNodes:
   # Additional sonar properties to load from a secret with a key "secret.properties" (must be a string)
   # sonarSecretProperties:
 
-  replicaCount: 2
+  replicaCount: 3
 
   # Pod Distribution Budget for search nodes
   podDistributionBudget:
